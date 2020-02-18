@@ -25,7 +25,9 @@
       v-if="toggle"
       style="height: 500px; width: 500px; border: 1px solid blue; position: absolute; top: 40px; left: 580px;"
     >
-      memes
+      <v-btn @click="addWidget()">
+        Add widget
+      </v-btn>
     </div>
 
     <v-btn
@@ -108,6 +110,8 @@ export default {
       this.widgetsOnDisplay[this.selectedWidget.id] = this.selectedWidget
     },
     onActivated (x, y, key) {
+      console.log(this.widgetsOnDisplay)
+      console.log(this.selectedWidget.id)
       this.selectedWidget = this.widgetsOnDisplay[key]
       this.lastPosition = {
         x,
@@ -116,6 +120,25 @@ export default {
     },
     toggleBox () {
       this.toggle ? this.toggle = false : this.toggle = true
+    },
+    addWidget () {
+      this.widgetsOnDisplay.push(
+        {
+          id: this.widgetsOnDisplay.length,
+          dimensions: {
+            width: 100,
+            height: 100
+          },
+          position: {
+            x: 0,
+            y: this.widgetsOnDisplay[this.widgetsOnDisplay.length - 1].position.y + 100
+          },
+          content: {
+            type: '',
+            text: 'Widget ' + this.widgetsOnDisplay.length - 1
+          }
+        }
+      )
     }
   }
 }
