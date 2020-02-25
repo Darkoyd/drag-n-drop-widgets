@@ -1,7 +1,8 @@
 <template>
   <div>
     <div
-      id="typehead"
+      id="dashboard"
+      ref="dashboard"
       style="height: 500px; width: 500px; border: 1px solid blue; position: absolute; top: 40px; left: 40px;"
     >
       <vue-draggable-resizable
@@ -9,7 +10,7 @@
         :key="key"
         :parent="true"
         :resizable="false"
-        :grid="[100,100]"
+        :grid="[100, 100]"
         :x="item.position.x"
         :y="item.position.y"
         :h="item.dimensions.height"
@@ -25,8 +26,17 @@
       v-if="toggle"
       style="height: 500px; width: 500px; border: 1px solid blue; position: absolute; top: 40px; left: 580px;"
     >
-      <v-btn @click="addWidget()">
-        Add widget
+      <v-btn @click="addWidget(100,100)">
+        Add widget 100x100
+      </v-btn>
+      <v-btn @click="addWidget(200,100)">
+        Add widget 200x100
+      </v-btn>
+      <v-btn @click="addWidget(100,200)">
+        Add widget 100x200
+      </v-btn>
+      <v-btn @click="addWidget(200,200)">
+        Add widget 200x200
       </v-btn>
     </div>
 
@@ -35,6 +45,8 @@
     >
       Show/Hide
     </v-btn>
+    {{ dashHeight }}
+    {{ dashWidth }}
   </div>
 </template>
 
@@ -49,69 +61,31 @@ export default {
   data () {
     return {
       toggle: true,
+      dashHeight: 0,
+      dashWidth: 0,
       selectedWidget: {},
       lastPosition: {
         x: 0,
         y: 0
       },
-      widgetsOnDisplay: [
-        {
-          id: 0,
-          dimensions: {
-            width: 100,
-            height: 100
-          },
-          position: {
-            x: 0,
-            y: 0
-          },
-          content: {
-            type: '',
-            text: 'Widget 1'
-          }
-        },
-        {
-          id: 1,
-          dimensions: {
-            width: 100,
-            height: 100
-          },
-          position: {
-            x: 0,
-            y: 100
-          },
-          content: {
-            type: '',
-            text: 'Widget 2'
-          }
-        },
-        {
-          id: 2,
-          dimensions: {
-            width: 100,
-            height: 100
-          },
-          position: {
-            x: 0,
-            y: 200
-          },
-          content: {
-            type: '',
-            text: 'Widget 3'
-          }
-        }
-      ]
+      widgetsOnDisplay: []
     }
   },
+  mounted () {
+    this.dashHeight = document.getElementById('dashboard').offsetHeight
+    this.dashWidth = this.$refs.dashboard.offsetWidth
+  },
   methods: {
+    calculateDimensions () {
+      this.dashHeight = document.getElementById('dashboard').offsetHeight
+      this.dashWidth = this.$refs.dashboard.offsetWidth
+    },
     onDragStop (x, y) {
       this.selectedWidget.position.x = x
       this.selectedWidget.position.y = y
       this.widgetsOnDisplay[this.selectedWidget.id] = this.selectedWidget
     },
     onActivated (x, y, key) {
-      console.log(this.widgetsOnDisplay)
-      console.log(this.selectedWidget.id)
       this.selectedWidget = this.widgetsOnDisplay[key]
       this.lastPosition = {
         x,
@@ -121,17 +95,18 @@ export default {
     toggleBox () {
       this.toggle ? this.toggle = false : this.toggle = true
     },
-    addWidget () {
+    addWidget (width, height) {
+      this.calculateDimensions()
       this.widgetsOnDisplay.push(
         {
           id: this.widgetsOnDisplay.length,
           dimensions: {
-            width: 100,
-            height: 100
+            width,
+            height
           },
           position: {
             x: 0,
-            y: this.widgetsOnDisplay[this.widgetsOnDisplay.length - 1].position.y + 100
+            y: 0
           },
           content: {
             type: '',
