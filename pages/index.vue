@@ -21,7 +21,6 @@
         Widget {{ key }} en {{ item.position.x }} {{ item.position.y }}
       </vue-draggable-resizable>
     </div>
-
     <div
       v-if="toggle"
       style="height: 500px; width: 500px; border: 1px solid blue; position: absolute; top: 40px; left: 580px;"
@@ -45,8 +44,8 @@
     >
       Show/Hide
     </v-btn>
-    {{ dashHeight }}
-    {{ dashWidth }}
+    Height: {{ dashHeight }}
+    Width: {{ dashWidth }}
   </div>
 </template>
 
@@ -60,20 +59,36 @@ export default {
   },
   data () {
     return {
+      loaded: false,
       toggle: true,
       dashHeight: 0,
       dashWidth: 0,
       selectedWidget: {},
-      lastPosition: {
-        x: 0,
-        y: 0
-      },
-      widgetsOnDisplay: []
+      widgetsOnDisplay: [
+        {
+          id: 0,
+          dimensions: {
+            height: 100,
+            width: 100
+          },
+          position: {
+            x: 0,
+            y: 0
+          },
+          content: {
+            type: '',
+            text: 'Widget ' + 0
+          }
+        }
+      ],
+      occupiedX: [],
+      occupiedY: []
     }
   },
   mounted () {
-    this.dashHeight = document.getElementById('dashboard').offsetHeight
+    this.dashHeight = this.$refs.dashboard.offsetHeight
     this.dashWidth = this.$refs.dashboard.offsetWidth
+    this.loaded = true
   },
   methods: {
     calculateDimensions () {
@@ -87,33 +102,83 @@ export default {
     },
     onActivated (x, y, key) {
       this.selectedWidget = this.widgetsOnDisplay[key]
-      this.lastPosition = {
-        x,
-        y
-      }
     },
     toggleBox () {
       this.toggle ? this.toggle = false : this.toggle = true
     },
+    checkPosition () {
+      const xPos = []
+      const yPos = []
+      this.widgetsOnDisplay.forEach((element) => {
+        xPos.push(element.position.x)
+        if (element.dimensions.width === 200) {
+          xPos.push(element.position.x + 100)
+        }
+        yPos.push(element.position.y)
+        if (element.dimensions.height === 200) {
+          yPos.push(element.position.y + 100)
+        }
+      })
+      this.occupiedX = this.uniq(xPos)
+      this.occupiedY = this.uniq(yPos)
+    },
+    getPositionX (width) {
+      let x = 0
+      for (let i = 0; x < 400; i++) {
+        if (this.occupiedX.includes(x) || (width === 200 && this.occupiedX.includes(x + 100))) {
+          x = x + 100
+        } else {
+          return x
+        }
+      }
+      throw new Error('No cabe en X')
+    },
+    getPositionY (height) {
+      let y = 0
+      for (let i = 0; y < 500; i++) {
+        if (this.occupiedY.includes(y) || (height === 200 && this.occupiedY.includes(y + 100))) {
+          y = y + 100
+        } else {
+          return y
+        }
+      }
+      throw new Error('No cabe en Y')
+    },
+    uniq (a) {
+      return a.sort().filter(function (item, pos, ary) {
+        return !pos || item !== ary[pos - 1]
+      })
+    },
     addWidget (width, height) {
       this.calculateDimensions()
-      this.widgetsOnDisplay.push(
-        {
-          id: this.widgetsOnDisplay.length,
-          dimensions: {
-            width,
-            height
-          },
-          position: {
-            x: 0,
-            y: 0
-          },
-          content: {
-            type: '',
-            text: 'Widget ' + this.widgetsOnDisplay.length - 1
+      try {
+        const xPos = this.getPositionX(width)
+        const yPos = this.getPositionY(height)
+        // eslint-disable-next-line no-console
+        console.log(xPos)
+        // eslint-disable-next-line no-console
+        console.log(yPos)
+        this.widgetsOnDisplay.push(
+          {
+            id: this.widgetsOnDisplay.length,
+            dimensions: {
+              width,
+              height
+            },
+            position: {
+              xPos,
+              yPos
+            },
+            content: {
+              type: '',
+              text: 'Widget ' + this.widgetsOnDisplay.length - 1
+            }
           }
-        }
-      )
+        )
+      } catch (error) {
+        alert(error)
+      }
+      this.checkPosition()
     }
   }
 }
