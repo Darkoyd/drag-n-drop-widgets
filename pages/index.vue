@@ -124,9 +124,9 @@ export default {
     },
     getPositionX (width) {
       let x = 0
-      for (let i = 0; x < 400; i++) {
+      for (; x < 400; x = x + 100) {
         if (this.occupiedX.includes(x) || (width === 200 && this.occupiedX.includes(x + 100))) {
-          x = x + 100
+          continue
         } else {
           return x
         }
@@ -135,9 +135,9 @@ export default {
     },
     getPositionY (height) {
       let y = 0
-      for (let i = 0; y < 500; i++) {
+      for (; y < 500; y = y + 100) {
         if (this.occupiedY.includes(y) || (height === 200 && this.occupiedY.includes(y + 100))) {
-          y = y + 100
+          continue
         } else {
           return y
         }
